@@ -140,6 +140,519 @@ pp Ripper.lex(code)
 						</code></pre>
 					</section>
 				</section>
+				<section>
+					<section>
+						<h1>Phasing</h1>
+						<h2>LALR</h2>
+						<h2>Bison</h2>
+					</section>
+					<section>
+						<h3>Spanish => English Example</h3>
+						<pre><code>
+Me gusta el Ruby. => I Like Ruby.
+Le gusta el Ruby. => She likes Ruby.
+						</code></pre>
+					</section>
+					<section>
+						<h3>Bison/Yacc grammar</h3>
+						<pre><code>
+SpanishPhrase: VerbAndObject el ruby {
+  printf("%s Ruby\n", $1);
+};
+VerbAndObject: SheLikes | ILike {
+  $$ = $1;
+};
+SheLikes: le gusta {
+  $$ = "She likes";
+}
+ILike: me gusta {
+  $$ = "I like";
+}
+						</code></pre>
+					</section>
+					<section>
+						<h3>Steps</h3>
+						<table style="margin: auto;">
+							<tr>
+								<th>Grammar Rule Stack</th>
+								<th>Tokens</th>
+								<th>Action</th>
+							</tr>
+							<tr>	
+								<td></td>
+								<td>le gusta el ruby</td>
+								<td></td>
+							</tr>	
+							<tr>	
+								<td>le</td>
+								<td>gusta el ruby</td>
+								<td>Shift</td>
+							</tr>	
+							<tr>	
+								<td>le gusta</td>
+								<td>el ruby</td>
+								<td>Shift</td>
+							</tr>	
+							<tr>	
+								<td>SheLikes</td>
+								<td>el ruby</td>
+								<td>Reduce</td>
+							</tr>	
+							<tr>	
+								<td>VerbAndObject</td>
+								<td>el ruby</td>
+								<td>Reduce</td>
+							</tr>	
+							<tr>	
+								<td>VerbAndObject el</td>
+								<td>ruby</td>
+								<td>Shift</td>
+							</tr>	
+							<tr>	
+								<td>VerbAndObject el ruby</td>
+								<td></td>
+								<td>Shift</td>
+							</tr>	
+							<tr>	
+								<td>SpanishPhrase</td>
+								<td></td>
+								<td>Match</td>
+							</tr>	
+						</table>
+					</section>
+					<section>
+						<h3>parse.y</h3>
+						<aside class="notes">
+							<p>parse.y:860</p>
+							<a target="_blank" href="/examples/ruby-1-4-bnf.pdf">BNF Syntax of Ruby 1.4</a>
+						</aside>
+					</section>
+					<section>
+						<h3>ruby -y</h3>
+						<pre><code>
+10.times do |n|
+  puts n
+end
+						</code></pre>
+					</section>
+					<section>
+						<pre><code>
+Starting parse
+Entering state 0
+Reducing stack by rule 1 (line 782):
+-> $$ = nterm @1 ()
+Stack now 0
+Entering state 2
+Reading a token: Next token is token tINTEGER ()
+Shifting token tINTEGER ()
+Entering state 41
+Reducing stack by rule 470 (line 4255):
+   $1 = token tINTEGER ()
+-> $$ = nterm numeric ()
+Stack now 0 2
+Entering state 104
+Reducing stack by rule 428 (line 3830):
+   $1 = nterm numeric ()
+-> $$ = nterm literal ()
+Stack now 0 2
+Entering state 94
+Reducing stack by rule 270 (line 2616):
+   $1 = nterm literal ()
+-> $$ = nterm primary ()
+Stack now 0 2
+Entering state 80
+Reading a token: Next token is token '.' ()
+Reducing stack by rule 329 (line 3071):
+   $1 = nterm primary ()
+-> $$ = nterm primary_value ()
+Stack now 0 2
+Entering state 81
+Next token is token '.' ()
+Shifting token '.' ()
+Entering state 336
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 533
+Reading a token: Next token is token keyword_do ()
+Reducing stack by rule 550 (line 4823):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm operation2 ()
+Stack now 0 2 81 336
+Entering state 538
+Next token is token keyword_do ()
+Reducing stack by rule 572 (line 4874):
+-> $$ = nterm none ()
+Stack now 0 2 81 336 538
+Entering state 676
+Reducing stack by rule 246 (line 2426):
+   $1 = nterm none ()
+-> $$ = nterm opt_paren_args ()
+Stack now 0 2 81 336 538
+Entering state 674
+Reducing stack by rule 404 (line 3635):
+   $1 = nterm primary_value ()
+   $2 = token '.' ()
+   $3 = nterm operation2 ()
+   $4 = nterm opt_paren_args ()
+-> $$ = nterm method_call ()
+Stack now 0 2
+Entering state 93
+Next token is token keyword_do ()
+Shifting token keyword_do ()
+Entering state 380
+Reducing stack by rule 414 (line 3735):
+-> $$ = nterm @28 ()
+Stack now 0 2 93 380
+Entering state 576
+Reading a token: Next token is token '|' ()
+Shifting token '|' ()
+Entering state 653
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 761
+Reading a token: Next token is token '|' ()
+Reducing stack by rule 518 (line 4543):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm f_norm_arg ()
+Stack now 0 2 93 380 576 653
+Entering state 636
+Reducing stack by rule 519 (line 4550):
+   $1 = nterm f_norm_arg ()
+-> $$ = nterm f_arg_item ()
+Stack now 0 2 93 380 576 653
+Entering state 637
+Reducing stack by rule 521 (line 4578):
+   $1 = nterm f_arg_item ()
+-> $$ = nterm f_arg ()
+Stack now 0 2 93 380 576 653
+Entering state 765
+Next token is token '|' ()
+Reducing stack by rule 572 (line 4874):
+-> $$ = nterm none ()
+Stack now 0 2 93 380 576 653 765
+Entering state 748
+Reducing stack by rule 537 (line 4723):
+   $1 = nterm none ()
+-> $$ = nterm opt_f_block_arg ()
+Stack now 0 2 93 380 576 653 765
+Entering state 850
+Reducing stack by rule 372 (line 3377):
+   $1 = nterm f_arg ()
+   $2 = nterm opt_f_block_arg ()
+-> $$ = nterm block_param ()
+Stack now 0 2 93 380 576 653
+Entering state 763
+Next token is token '|' ()
+Reducing stack by rule 572 (line 4874):
+-> $$ = nterm none ()
+Stack now 0 2 93 380 576 653 763
+Entering state 770
+Reducing stack by rule 385 (line 3479):
+   $1 = nterm none ()
+-> $$ = nterm opt_bv_decl ()
+Stack now 0 2 93 380 576 653 763
+Entering state 847
+Next token is token '|' ()
+Shifting token '|' ()
+Entering state 905
+Reducing stack by rule 384 (line 3468):
+   $1 = token '|' ()
+   $2 = nterm block_param ()
+   $3 = nterm opt_bv_decl ()
+   $4 = token '|' ()
+-> $$ = nterm block_param_def ()
+Stack now 0 2 93 380 576
+Entering state 655
+Reducing stack by rule 381 (line 3444):
+   $1 = nterm block_param_def ()
+-> $$ = nterm opt_block_param ()
+Stack now 0 2 93 380 576
+Entering state 716
+Reading a token: Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 35
+Reading a token: Next token is token tIDENTIFIER ()
+Reducing stack by rule 547 (line 4818):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm operation ()
+Stack now 0 2 93 380 576 716
+Entering state 110
+Next token is token tIDENTIFIER ()
+Reducing stack by rule 258 (line 2499):
+-> $$ = nterm @7 ()
+Stack now 0 2 93 380 576 716 110
+Entering state 219
+Next token is token tIDENTIFIER ()
+Shifting token tIDENTIFIER ()
+Entering state 35
+Reading a token: Next token is token '\n' ()
+Reducing stack by rule 474 (line 4275):
+   $1 = token tIDENTIFIER ()
+-> $$ = nterm user_variable ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 209
+Next token is token '\n' ()
+Reducing stack by rule 486 (line 4291):
+   $1 = nterm user_variable ()
+-> $$ = nterm var_ref ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 107
+Reducing stack by rule 276 (line 2622):
+   $1 = nterm var_ref ()
+-> $$ = nterm primary ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 80
+Next token is token '\n' ()
+Reducing stack by rule 239 (line 2375):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 203
+Next token is token '\n' ()
+Reducing stack by rule 240 (line 2381):
+   $1 = nterm arg ()
+-> $$ = nterm arg_value ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 204
+Next token is token '\n' ()
+Reducing stack by rule 263 (line 2531):
+   $1 = nterm arg_value ()
+-> $$ = nterm args ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 207
+Next token is token '\n' ()
+Reducing stack by rule 572 (line 4874):
+-> $$ = nterm none ()
+Stack now 0 2 93 380 576 716 110 219 207
+Entering state 398
+Reducing stack by rule 262 (line 2525):
+   $1 = nterm none ()
+-> $$ = nterm opt_block_arg ()
+Stack now 0 2 93 380 576 716 110 219 207
+Entering state 397
+Reducing stack by rule 254 (line 2463):
+   $1 = nterm args ()
+   $2 = nterm opt_block_arg ()
+-> $$ = nterm call_args ()
+Stack now 0 2 93 380 576 716 110 219
+Entering state 409
+Reducing stack by rule 259 (line 2499):
+   $1 = nterm @7 ()
+   $2 = nterm call_args ()
+-> $$ = nterm command_args ()
+Stack now 0 2 93 380 576 716 110
+Entering state 387
+Next token is token '\n' ()
+Reducing stack by rule 58 (line 1344):
+   $1 = nterm operation ()
+   $2 = nterm command_args ()
+-> $$ = nterm command ()
+Stack now 0 2 93 380 576 716
+Entering state 72
+Next token is token '\n' ()
+Reducing stack by rule 51 (line 1297):
+   $1 = nterm command ()
+-> $$ = nterm command_call ()
+Stack now 0 2 93 380 576 716
+Entering state 70
+Reducing stack by rule 44 (line 1249):
+   $1 = nterm command_call ()
+-> $$ = nterm expr ()
+Stack now 0 2 93 380 576 716
+Entering state 69
+Next token is token '\n' ()
+Reducing stack by rule 41 (line 1225):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 0 2 93 380 576 716
+Entering state 245
+Next token is token '\n' ()
+Reducing stack by rule 14 (line 933):
+   $1 = nterm stmt ()
+-> $$ = nterm stmts ()
+Stack now 0 2 93 380 576 716
+Entering state 244
+Next token is token '\n' ()
+Shifting token '\n' ()
+Entering state 289
+Reducing stack by rule 569 (line 4866):
+   $1 = token '\n' ()
+-> $$ = nterm term ()
+Stack now 0 2 93 380 576 716 244
+Entering state 291
+Reducing stack by rule 570 (line 4869):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 0 2 93 380 576 716 244
+Entering state 433
+Reading a token: Next token is token keyword_end ()
+Reducing stack by rule 560 (line 4847):
+   $1 = nterm terms ()
+-> $$ = nterm opt_terms ()
+Stack now 0 2 93 380 576 716 244
+Entering state 432
+Reducing stack by rule 12 (line 913):
+   $1 = nterm stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm compstmt ()
+Stack now 0 2 93 380 576 716
+Entering state 817
+Next token is token keyword_end ()
+Shifting token keyword_end ()
+Entering state 881
+Reducing stack by rule 415 (line 3734):
+   $1 = token keyword_do ()
+   $2 = nterm @28 ()
+   $3 = nterm opt_block_param ()
+   $4 = nterm compstmt ()
+   $5 = token keyword_end ()
+-> $$ = nterm brace_block ()
+Stack now 0 2 93
+Entering state 382
+Reducing stack by rule 298 (line 2781):
+   $1 = nterm method_call ()
+   $2 = nterm brace_block ()
+-> $$ = nterm primary ()
+Stack now 0 2
+Entering state 80
+Reading a token: Next token is token '\n' ()
+Reducing stack by rule 239 (line 2375):
+   $1 = nterm primary ()
+-> $$ = nterm arg ()
+Stack now 0 2
+Entering state 79
+Next token is token '\n' ()
+Reducing stack by rule 49 (line 1282):
+   $1 = nterm arg ()
+-> $$ = nterm expr ()
+Stack now 0 2
+Entering state 69
+Next token is token '\n' ()
+Reducing stack by rule 41 (line 1225):
+   $1 = nterm expr ()
+-> $$ = nterm stmt ()
+Stack now 0 2
+Entering state 67
+Next token is token '\n' ()
+Reducing stack by rule 8 (line 855):
+   $1 = nterm stmt ()
+-> $$ = nterm top_stmt ()
+Stack now 0 2
+Entering state 66
+Reducing stack by rule 5 (line 833):
+   $1 = nterm top_stmt ()
+-> $$ = nterm top_stmts ()
+Stack now 0 2
+Entering state 65
+Next token is token '\n' ()
+Shifting token '\n' ()
+Entering state 289
+Reducing stack by rule 569 (line 4866):
+   $1 = token '\n' ()
+-> $$ = nterm term ()
+Stack now 0 2 65
+Entering state 291
+Reducing stack by rule 570 (line 4869):
+   $1 = nterm term ()
+-> $$ = nterm terms ()
+Stack now 0 2 65
+Entering state 292
+Reading a token: Now at end of input.
+Reducing stack by rule 560 (line 4847):
+   $1 = nterm terms ()
+-> $$ = nterm opt_terms ()
+Stack now 0 2 65
+Entering state 290
+Reducing stack by rule 3 (line 813):
+   $1 = nterm top_stmts ()
+   $2 = nterm opt_terms ()
+-> $$ = nterm top_compstmt ()
+Stack now 0 2
+Entering state 64
+Reducing stack by rule 2 (line 782):
+   $1 = nterm @1 ()
+   $2 = nterm top_compstmt ()
+-> $$ = nterm program ()
+Stack now 0
+Entering state 1
+Now at end of input.
+Stack now 0 1
+Cleanup: popping nterm program ()
+						</code></pre>
+					</section>
+					<section>
+						<h3>Ripper.sexp</h3>
+						<pre><code>
+require 'ripper'
+require 'pp'
+code = &lt;&lt;STR
+  10.times do |n|
+    puts n
+  end
+STR
+puts code
+pp Ripper.sexp(code)
+						</code></pre>
+					</section>
+					<section>
+						<pre><code>
+[:program,
+ [[:method_add_block,
+   [:call, [:@int, "10", [1, 3]], :".", [:@ident, "times", [1, 6]]],
+   [:do_block,
+    [:block_var,
+     [:params, [[:@ident, "n", [1, 16]]], nil, nil, nil, nil],
+     nil],
+    [[:command,
+      [:@ident, "puts", [2, 0]],
+      [:args_add_block, [[:var_ref, [:@ident, "n", [2, 5]]]], false]]]]]]]
+						</code></pre>
+					</section>
+					<section>
+						<h3>ruby --dump parsetree</h3>
+						<pre><code>
+@ NODE_SCOPE (line: 3)
++- nd_tbl: (empty)
++- nd_args:
+|   (null node)
++- nd_body:
+    @ NODE_ITER (line: 1)
+    +- nd_iter:
+    |   @ NODE_CALL (line: 1)
+    |   +- nd_mid: :times
+    |   +- nd_recv:
+    |   |   @ NODE_LIT (line: 1)
+    |   |   +- nd_lit: 10
+    |   +- nd_args:
+    |       (null node)
+    +- nd_body:
+        @ NODE_SCOPE (line: 3)
+        +- nd_tbl: :n
+        +- nd_args:
+        |   @ NODE_ARGS (line: 1)
+        |   +- nd_frml: 1
+        |   +- nd_next:
+        |   |   @ NODE_ARGS_AUX (line: 1)
+        |   |   +- nd_rest: (null)
+        |   |   +- nd_body: (null)
+        |   |   +- nd_next:
+        |   |       (null node)
+        |   +- nd_opt:
+        |       (null node)
+        +- nd_body:
+            @ NODE_FCALL (line: 2)
+            +- nd_mid: :puts
+            +- nd_args:
+                @ NODE_ARRAY (line: 2)
+                +- nd_alen: 1
+                +- nd_head:
+                |   @ NODE_DVAR (line: 2)
+                |   +- nd_vid: :n
+                +- nd_next:
+                    (null node)
+						</code></pre>
+					</section>
+				</section>
 			</div>
 		</div>
 
