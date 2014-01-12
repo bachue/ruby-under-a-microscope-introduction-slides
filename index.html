@@ -1003,6 +1003,56 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						<img src="img/catch_table.png" />
 					</section>
 				</section>
+				<section>
+					<section>
+						<h1>Objects &amp; Class</h1>
+					</section>
+					<section>
+						<h3>RObject</h3>
+						<img src="img/r_object.png" />
+						<aside class="notes">
+							<p>At the top of the figure is a pointer to the RObject structure. (Internally, Ruby always refers to any value with a VALUE pointer.) Below this pointer, the RObject structure contains an inner RBasic structure and information spe- cific to custom objects. The RBasic sec- tion contains information that all values use: a set of Boolean values called flags that store a variety of internal technical values, and a class pointer called klass.</p>
+							<p>The class pointer indicates which class an object is an instance of. In the RObject section, Ruby saves an array of instance variables that each object contains, using numiv, the instance variable count, and ivptr, a pointer to an array of values.</p>
+						</aside>
+					</section>
+					<section>
+						<h3>Example</h3>
+						<pre><code>
+class Mathematician
+  attr_accessor :first_name
+  attr_accessor :last_name
+end
+
+euler = Mathematician.new
+euler.first_name = 'Leonhard'
+euler.last_name = 'Euler'
+
+euclid = Mathematician.new
+euclid.first_name = 'Euclid'
+						</code></pre>
+					</section>
+					<section>
+						<img src="img/r_object_example.png" />
+					</section>
+					<section>
+						<h3>Generic Objects</h3>
+						<img src="img/generic_objects.png" />
+					</section>
+					<section>
+						<h3>Fixnum</h3>
+						<img src="img/fixnum_object.png" />
+						<aside class="notes">
+							Symbol, NilClass, TrueClass, FalseClass has their owned flags.
+						</aside>
+					</section>
+					<section>
+						<h3>How do generic objects have instance variables?</h3>
+						<img src="img/generic_iv_tbl.png" />
+						<aside class="notes">
+							All generic objects don't have their owned numiv and ivptr.
+						</aside>
+					</section>
+				</section>
 			</div>
 		</div>
 
