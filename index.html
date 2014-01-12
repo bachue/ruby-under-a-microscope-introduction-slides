@@ -171,7 +171,7 @@ ILike: me gusta {
 						</code></pre>
 					</section>
 					<section>
-						<h3>Steps</h3>
+						<h3>Simplified Steps</h3>
 						<table style="margin: auto;">
 							<tr>
 								<th>Grammar Rule Stack</th>
@@ -219,6 +219,9 @@ ILike: me gusta {
 								<td>Match</td>
 							</tr>	
 						</table>
+						<aside class="notes">
+							LALR Goto Table
+						</aside>
 					</section>
 					<section>
 						<h3>parse.y</h3>
@@ -754,6 +757,146 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						</code></pre>
 						<aside class="notes">
 							Local variable
+						</aside>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h1>Execution</h1>
+						<h3>As double stack machine</h3>
+					</section>
+					<section>
+						<h3>rb_control_frame_t</h3>
+						<img src="img/rb_control_frame_t-1.png" />
+					</section>
+					<section>
+						<h3>caller</h3>
+						<img src="img/rb_control_frame_t-2.png" />
+					</section>
+					<section>
+						<h3>Example</h3>
+						<pre><code>
+10.times do
+  puts "The quick brown fox jumps over the lazy dog."
+end
+						</code></pre>
+					</section>
+					<section>
+						<img src="img/rb_control_frame_t-3.png" />
+					</section>
+					<section>
+						<h3>Local Variable Access</h3>
+					</section>
+					<section>
+						<h3>Environment Pointer</h3>
+						<img src="examples/local_variable_1.png" />
+						<aside class="notes">
+							EP = SP - 1
+							Special: to track information related to blocks(rb_block_t).
+						</aside>
+					</section>
+					<section>
+						<img src="examples/local_variable_2.png" />
+						<aside class="notes">
+							<p>Local variable table is not a table(Just like C)</p>
+							<p>svar: pointer to special variable table</p>
+							<p>cref: pointer to current lexical scope</p>
+							<p>Method Arguments Are Treated Like Local Variables</p>
+						</aside>
+					</section>
+					<section>
+						<h3>Dynamic Variable Access</h3>
+						<pre><code>
+code = &lt;&lt;-RUBY
+  def display_string
+    str = "Dynamic access."
+    10.times do
+      puts str
+    end
+  end
+RUBY
+
+puts RubyVM::InstructionSequence.compile(code).disasm
+						</code></pre>
+					</section>
+					<section>
+						<pre><code style="max-height: inherit;">
+== disasm: &lt;RubyVM::InstructionSequence:f@&lt;compiled&gt;&gt;===================
+== catch table
+| catch type: break  st: 0010 ed: 0014 sp: 0000 cont: 0014
+|------------------------------------------------------------------------
+local table (size: 2, argc: 0 [opts: 0, rest: -1, post: 0, block: -1] s1)
+[ 2] str
+0000 trace            8                                               (   1)
+0002 trace            1                                               (   2)
+0004 putstring        "Dynamic access."
+0006 setlocal_OP__WC__0 2
+0008 trace            1                                               (   3)
+0010 putobject        10
+0012 send             &lt;callinfo!mid:times, argc:0, block:block in f&gt;
+0014 trace            16                                              (   6)
+0016 leave                                                            (   3)
+== disasm: &lt;RubyVM::InstructionSequence:block in f@&lt;compiled&gt;&gt;==========
+== catch table
+| catch type: redo   st: 0000 ed: 0009 sp: 0000 cont: 0000
+| catch type: next   st: 0000 ed: 0009 sp: 0000 cont: 0009
+|------------------------------------------------------------------------
+0000 trace            256                                             (   3)
+0002 trace            1                                               (   4)
+0004 putself
+0005 getlocal_OP__WC__1 2
+0007 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0009 trace            512                                             (   5)
+0011 leave                                                            (   4)
+						</code></pre>
+					</section>
+					<section>
+						<img src="examples/dynamic_variable.png" />
+					</section>
+					<section>
+						<h3>Special Variable Access</h3>
+					</section>
+					<section>
+						<pre><code>
+str = "The quick brown fox jumped over the lazy dog.\n"
+/fox/.match(str)
+def search(str)
+  /dog/.match(str)
+  puts "Value of $&amp; inside method: \#{$&amp;}"
+end
+search(str)
+puts "Value of $&amp; in the top level scope: \#{$&amp;}"
+						</code></pre>
+						<aside class="notes">
+							Guess: What's the answer?
+						</aside>
+					</section>
+					<section>
+						<img src="examples/special_variable_1.png" />
+					</section>
+					<section>
+						<pre><code>
+str = "The quick brown fox jumped over the lazy dog.\n"
+/fox/.match(str)
+2.times do
+  /dog/.match(str)
+  puts "Value of $&amp; inside block: \#{$&amp;}"
+end
+puts "Value of $&amp; in the top level scope: \#{$&amp;}"
+						</code></pre>
+						<aside class="notes">
+							Guess: What's the answer?
+						</aside>
+					</section>
+					<section>
+						<img src="examples/special_variable_2.png" />
+					</section>
+					<section>
+						<h3>YARV Instruments Definitions</h3>
+						<aside class="notes">
+							<div>tool/insns2vm.rb</div>
+							<div>insns.def</div>
+							<div>vm.inc</div>
 						</aside>
 					</section>
 				</section>
