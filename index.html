@@ -666,6 +666,23 @@ pp Ripper.sexp(code)
 						<img src="img/ruby-19-20-layers.png" />
 					</section>
 					<section>
+						<h3>Benchmark</h3>
+						<pre><code>
+i= 0
+while i &lt; ARGV[0].to_i
+  i += 1
+end
+						</code></pre>
+					</section>
+					<section>
+						<h3>logarithmic scale</h3>
+						<img src="img/ruby-logarithmic-performance.png" />
+					</section>
+					<section>
+						<h3>linear scale</h3>
+						<img src="img/ruby-linear-performance.png" />
+					</section>
+					<section>
 						<h3>iseq_compile_each in compile.c</h3>
 						<aside class="notes">
 							<p>compile.c:6933</p>
