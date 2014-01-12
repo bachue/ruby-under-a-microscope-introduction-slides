@@ -227,7 +227,7 @@ ILike: me gusta {
 						<h3>parse.y</h3>
 						<aside class="notes">
 							<p>parse.y:860</p>
-							<a target="_blank" href="/examples/ruby-1-4-bnf.pdf">BNF Syntax of Ruby 1.4</a>
+							<a target="_blank" href="/img/ruby-1-4-bnf.pdf">BNF Syntax of Ruby 1.4</a>
 						</aside>
 					</section>
 					<section>
@@ -789,14 +789,14 @@ end
 					</section>
 					<section>
 						<h3>Environment Pointer</h3>
-						<img src="examples/local_variable_1.png" />
+						<img src="img/local_variable_1.png" />
 						<aside class="notes">
 							EP = SP - 1
 							Special: to track information related to blocks(rb_block_t).
 						</aside>
 					</section>
 					<section>
-						<img src="examples/local_variable_2.png" />
+						<img src="img/local_variable_2.png" />
 						<aside class="notes">
 							<p>Local variable table is not a table(Just like C)</p>
 							<p>svar: pointer to special variable table</p>
@@ -851,12 +851,13 @@ local table (size: 2, argc: 0 [opts: 0, rest: -1, post: 0, block: -1] s1)
 						</code></pre>
 					</section>
 					<section>
-						<img src="examples/dynamic_variable.png" />
+						<img src="img/dynamic_variable.png" />
 					</section>
 					<section>
 						<h3>Special Variable Access</h3>
 					</section>
 					<section>
+						<h3>Guess?</h3>
 						<pre><code>
 str = "The quick brown fox jumped over the lazy dog.\n"
 /fox/.match(str)
@@ -872,9 +873,10 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 						</aside>
 					</section>
 					<section>
-						<img src="examples/special_variable_1.png" />
+						<img src="img/special_variable_1.png" />
 					</section>
 					<section>
+						<h3>Guess Again?</h3>
 						<pre><code>
 str = "The quick brown fox jumped over the lazy dog.\n"
 /fox/.match(str)
@@ -889,7 +891,7 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 						</aside>
 					</section>
 					<section>
-						<img src="examples/special_variable_2.png" />
+						<img src="img/special_variable_2.png" />
 					</section>
 					<section>
 						<h3>YARV Instruments Definitions</h3>
@@ -898,6 +900,107 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 							<div>insns.def</div>
 							<div>vm.inc</div>
 						</aside>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h1>Control Structures</h1>
+					</section>
+					<section>
+						<h3>Example</h3>
+						<pre><code>
+code = &lt;&lt;-RUBY
+  i = 0
+  while i &lt; 20
+    if i &lt; 10
+      puts 'small'
+    else
+      for j in 0..3
+        puts "large \#{j}"
+      end
+    end
+    i += 1
+  end
+  puts 'done'
+RUBY
+
+puts RubyVM::InstructionSequence.compile(code).disasm
+						</code></pre>
+					</section>
+					<section>
+						<pre><code>
+== disasm: &lt;RubyVM::InstructionSequence:&lt;compiled&gt;@&lt;compiled&gt;&gt;==========
+== catch table
+| catch type: break  st: 0035 ed: 0039 sp: 0000 cont: 0039
+| catch type: break  st: 0013 ed: 0058 sp: 0000 cont: 0058
+| catch type: next   st: 0013 ed: 0058 sp: 0000 cont: 0010
+| catch type: redo   st: 0013 ed: 0058 sp: 0000 cont: 0013
+|------------------------------------------------------------------------
+local table (size: 3, argc: 0 [opts: 0, rest: -1, post: 0, block: -1] s1)
+[ 3] i          [ 2] j
+0000 trace            1                                               (   1)
+0002 putobject_OP_INT2FIX_O_0_C_
+0003 setlocal_OP__WC__0 3
+0005 trace            1                                               (   2)
+0007 jump             49
+0009 putnil
+0010 pop
+0011 jump             49
+0013 trace            1                                               (   3)
+0015 getlocal_OP__WC__0 3
+0017 putobject        10
+0019 opt_lt           &lt;callinfo!mid:&lt;, argc:1, ARGS_SKIP&gt;
+0021 branchunless     33
+0023 trace            1                                               (   4)
+0025 putself
+0026 putstring        "small"
+0028 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0030 pop
+0031 jump             40                                              (   3)
+0033 trace            1                                               (   6)
+0035 putobject        0..3
+0037 send             &lt;callinfo!mid:each, argc:0, block:block in &lt;compiled&gt;&gt;
+0039 pop
+0040 trace            1                                               (  10)
+0042 getlocal_OP__WC__0 3
+0044 putobject_OP_INT2FIX_O_1_C_
+0045 opt_plus         &lt;callinfo!mid:+, argc:1, ARGS_SKIP&gt;
+0047 setlocal_OP__WC__0 3
+0049 getlocal_OP__WC__0 3                                             (   2)
+0051 putobject        20
+0053 opt_lt           &lt;callinfo!mid:&lt;, argc:1, ARGS_SKIP&gt;
+0055 branchif         13
+0057 putnil
+0058 pop
+0059 trace            1                                               (  12)
+0061 putself
+0062 putstring        "done"
+0064 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0066 leave
+== disasm: &lt;RubyVM::InstructionSequence:block in &lt;compiled&gt;@&lt;compiled&gt;&gt;=
+== catch table
+| catch type: redo   st: 0004 ed: 0018 sp: 0000 cont: 0004
+| catch type: next   st: 0004 ed: 0018 sp: 0000 cont: 0018
+|------------------------------------------------------------------------
+local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
+[ 2] ?&lt;Arg&gt;
+0000 getlocal_OP__WC__0 2                                             (   8)
+0002 setlocal_OP__WC__1 2                                             (   6)
+0004 trace            256
+0006 trace            1                                               (   7)
+0008 putself
+0009 putobject        "large "
+0011 getlocal_OP__WC__1 2
+0013 tostring
+0014 concatstrings    2
+0016 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0018 trace            512                                             (   8)
+0020 leave                                                            (   7)
+						</code></pre>
+					</section>
+					<section>
+						<h3>Catch table</h3>
+						<img src="img/catch_table.png" />
 					</section>
 				</section>
 			</div>
