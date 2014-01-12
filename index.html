@@ -653,6 +653,93 @@ pp Ripper.sexp(code)
 						</code></pre>
 					</section>
 				</section>
+				<section>
+					<section>
+						<h1>Compilation</h1>
+					</section>
+					<section>
+						<h3>Ruby 1.8</h3>
+						<img src="img/ruby-18-layers.png" />
+					</section>
+					<section>
+						<h3>Ruby 1.9 &amp; 2.0</h3>
+						<img src="img/ruby-19-20-layers.png" />
+					</section>
+					<section>
+						<h3>iseq_compile_each in compile.c</h3>
+						<aside class="notes">
+							<p>compile.c:6933</p>
+						</aside>
+					</section>
+					<section>
+						<h3>Example</h3>
+						<pre><code>
+code = &lt;&lt;-RUBY
+  puts 1 + 2
+RUBY
+
+puts RubyVM::InstructionSequence.compile(code).disasm
+						</code></pre>
+					</section>
+					<section>
+						<h3>Compiled</h3>
+						<pre><code>
+== disasm: &lt;RubyVM::InstructionSequence:&lt;compiled&gt;@&lt;compiled&gt;&gt;==========
+0000 trace            1                                               (   1)
+0002 putself
+0003 putobject_OP_INT2FIX_O_1_C_
+0004 putobject        2
+0006 opt_plus         &lt;callinfo!mid:+, argc:1, ARGS_SKIP&gt;
+0008 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0010 leave
+						</code></pre>
+						<aside class="notes">
+							Stack machine
+						</aside>
+					</section>
+					<section>
+						<h3>Example 2</h3>
+						<pre><code>
+code = &lt;&lt;-RUBY
+  10.times do |n|
+    puts n
+  end
+RUBY
+
+puts RubyVM::InstructionSequence.compile(code).disasm
+						</code></pre>
+					</section>
+					<section>
+						<h3>Compiled</h3>
+						<pre><code style="max-height: inherit;">
+== disasm: &lt;RubyVM::InstructionSequence:&lt;compiled&gt;@&lt;compiled&gt;&gt;==========
+== catch table
+| catch type: break  st: 0002 ed: 0006 sp: 0000 cont: 0006
+|------------------------------------------------------------------------
+0000 trace            1                                               (   1)
+0002 putobject        10
+0004 send             &lt;callinfo!mid:times, argc:0, block:block in &lt;compiled&gt;&gt;
+0006 leave
+== disasm: &lt;RubyVM::InstructionSequence:block in &lt;compiled&gt;@&lt;compiled&gt;&gt;=
+== catch table
+| catch type: redo   st: 0000 ed: 0009 sp: 0000 cont: 0000
+| catch type: next   st: 0000 ed: 0009 sp: 0000 cont: 0009
+|------------------------------------------------------------------------
+local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
+[ 2] n&lt;Arg&gt;
+0000 trace            256                                             (   1)
+0002 trace            1                                               (   2)
+0004 putself
+0005 getlocal_OP__WC__0 2
+0007 opt_send_simple  &lt;callinfo!mid:puts, argc:1, FCALL|ARGS_SKIP&gt;
+0009 trace            512                                             (   3)
+0011 leave                                                            (   2)
+						</code></pre>
+						<aside class="notes">
+							Local variable
+						</aside>
+					</section>
+				</section>
 			</div>
 		</div>
 
