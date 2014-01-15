@@ -1013,6 +1013,8 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						<aside class="notes">
 							<p>At the top of the figure is a pointer to the RObject structure. (Internally, Ruby always refers to any value with a VALUE pointer.) Below this pointer, the RObject structure contains an inner RBasic structure and information spe- cific to custom objects. The RBasic sec- tion contains information that all values use: a set of Boolean values called flags that store a variety of internal technical values, and a class pointer called klass.</p>
 							<p>The class pointer indicates which class an object is an instance of. In the RObject section, Ruby saves an array of instance variables that each object contains, using numiv, the instance variable count, and ivptr, a pointer to an array of values.</p>
+                            <p>RBasic: includes/ruby/ruby.h:747</p>
+                            <p>RObject: includes/ruby/ruby.h:762</p>
 						</aside>
 					</section>
 					<section>
@@ -1034,6 +1036,17 @@ euclid.first_name = 'Euclid'
 					<section>
 						<img src="img/r_object_example.png" />
 					</section>
+                    <section>
+                        <h3>Instance Variable Access</h3>
+                        <img src="img/instance_variable_1.png" />
+                        <img src="img/instance_variable_2.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>In Ruby 1.8, RObject stores instance variables as a hashmap.</li>
+                                <li>In Ruby 1.9, RObject just stores values of instance variables in an Array, and RClass stores names of them. Use index to connect them.</li>
+                                <li>Instance variable values table will preallocate more space.</li>
+                        </aside>
+                    </section>
 					<section>
 						<h3>Generic Objects</h3>
 						<img src="img/generic_objects.png" />
@@ -1049,9 +1062,25 @@ euclid.first_name = 'Euclid'
 						<h3>How do generic objects have instance variables?</h3>
 						<img src="img/generic_iv_tbl.png" />
 						<aside class="notes">
-							All generic objects don't have their owned numiv and ivptr.
+							All generic objects don't have their owned numiv and ivptr. Ruby saves it in a special hash called generic_iv_tbl. This hash maintains a map between generic objects and pointers to other hashes that contain each object’s instance variables.
 						</aside>
 					</section>
+                    <section>
+                        <h3>RClass</h3>
+                        <img src="img/r_class.png" />
+                        <aside class="notes">
+                            <p>RClass: include/ruby/ruby.h:790</p>
+                            <p>rb_classext_struct: internal.h:264</p>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Class Instance Variable Access</h3>
+                        <img src="img/class_instance_variable.png" />
+                    </section>
+                    <section>
+                        <h3>Class Variable Access</h3>
+                        <img src="img/class_variable.png" />
+                    </section>
 				</section>
 			</div>
 		</div>
