@@ -57,6 +57,10 @@
 						<li>Ruby programmer</li>
 						<li>No C programming knowledge is required</li>
 					</ul>
+                    <aside class="notes">
+                        <p>No Ruby basis explaination in these slides!</p>
+                        <p>No C code in these slides!</p>
+                    </aside>
 				</section>
 
 				<section>
@@ -1082,6 +1086,107 @@ euclid.first_name = 'Euclid'
                         <img src="img/class_variable.png" />
                     </section>
 				</section>
+                <section>
+                    <section>
+                        <h1>Method Lookup &amp; Constant Lookup</h1>
+                    </section>
+                    <section>
+                        <h3>Module</h3>
+                        <h4>There's no RModule in MRI Ruby</h4>
+                    </section>
+                    <section>
+                        <img src="img/r_class_for_module.png" />
+                    </section>
+                    <section>
+                        <h3>Include Module in a Class</h3>
+                        <pre><code>
+module Professor
+end
+
+class Methematician &lt; Person
+  include Professor
+end
+                        </code></pre>
+                    </section>
+                    <section>
+                        <img src="img/include_a_module_in_class.png" />
+                    </section>
+                    <section>
+                        <h3>Include one Module into Another</h3>
+                        <img src="img/include_multi_modules_in_class.png" />
+                    </section>
+                    <section>
+                        <h3>Prepend Module in a Class</h3>
+                        <img src="img/prepend_module_in_class.png" />
+                        <aside class="notes">
+                            Why does this design so tricky? Why not make it just direct? If we call method on this class directly, we won't find it if it is defined in prepended module.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Guess: Does it work?</h3>
+                        <pre><code>
+module A
+  def f
+    'module A'
+  end
+end
+
+class C
+  include A
+end
+
+C.new.f
+                        </code></pre>
+                        <aside class="notes">
+                            Works, <code>m_tbl</code> will be copyed but still share memory.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Guess Again?</h3>
+                        <pre><code style="max-height: inherit;">
+module A
+  def f
+    'module A'
+  end
+end
+
+module B
+end
+
+class C
+  include B
+end
+
+module B
+  include A
+end
+
+C.new.f
+                        </code></pre>
+                        <aside class="notes">
+                            <p>No, <code>module B</code> has been copyed, it can't include module A in its copy.</p>
+                            <p>rb_include_module: class.c:823</p>
+                            <p>include_modules_at: class.c:848</p>
+                            <p>rb_include_class_new: class.c:788</p>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Global Method Cache</h3>
+                        <table style="margin: auto;">
+                            <tr><th>klass</th><th>defined_class</th></tr>
+                            <tr><td>Fixnum#times</td><td>Integer#times</td></tr>
+                            <tr><td>Object#puts</td><td>BasicObject#puts</td></tr>
+                            <tr><td>etc ...</td><td>etc ...</td></tr>
+                        </table>
+                    </section>
+                    <section>
+                        <h3>The Inline Method Cache</h3>
+                        <img src="img/inline_method_cache.png" />
+                        <aside class="notes">
+                            Any possible method creation, importing or removing will clean all caches.
+                        </aside>
+                    </section>
+                </section>
 			</div>
 		</div>
 
