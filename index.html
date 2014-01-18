@@ -1085,6 +1085,19 @@ euclid.first_name = 'Euclid'
                         <h3>Class Variable Access</h3>
                         <img src="img/class_variable.png" />
                     </section>
+                    <section>
+                        <h3>Guess?</h3>
+                        <pre><code>
+class SuperClass
+end
+class SubClass &lt; SuperClass
+end
+
+SubClass.class_variable_set :@@b, 'b'
+SuperClass.class_variable_set :@@b, 'a'
+SubClass.class_variable_set :@@b
+                        </code></pre>
+                    </section>
 				</section>
                 <section>
                     <section>
@@ -1184,6 +1197,38 @@ C.new.f
                         <img src="img/inline_method_cache.png" />
                         <aside class="notes">
                             Any possible method creation, importing or removing will clean all caches.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Lexical Scope</h3>
+                        <img src="img/lexical_scope.png" />
+                    </section>
+                    <section>
+                        <h3>Constant Access</h3>
+                    </section>
+                    <section>
+                        <h3>Guess?</h3>
+                        <pre><code>
+class SuperClass
+  FIND_ME = "Found in SuperClass"
+end
+
+module ParentLexicalScope
+  FIND_ME = "Found in ParentLexicalScope"
+
+  class SubClass &lt; SuperClass
+    p FIND_ME
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            <ul>
+                                <li>search through lexical scope chain</li>
+                                <li>for each scope's class, check for autoload</li>
+                                <li>search through superclass chain</li>
+                                <li>for each superclass, check for autoload</li>
+                                <li>call const_missing</li>
+                            </ul>
                         </aside>
                     </section>
                 </section>
