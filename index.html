@@ -59,9 +59,26 @@
 					</ul>
                     <aside class="notes">
                         <p>No Ruby basis explaination in these slides!</p>
-                        <p>No C code in these slides!</p>
+                        <p>No C code shown in these slides!</p>
                     </aside>
 				</section>
+
+                <section>
+                    <h3>Agenda</h3>
+                    <ul>
+                        <li>Overview</li>
+                        <li>Tokenize</li>
+                        <li>Parsing</li>
+                        <li>Compilation</li>
+                        <li>Execution as double stack machine</li>
+                        <li>Control Structures</li>
+                        <li>Objects &amp; Class</li>
+                        <li>Method Lookup &amp; Constant Lookup</li>
+                        <li>Closure</li>
+                        <li>Metaprogramming</li>
+                        <li>GC</li>
+                    </ul>
+                </section>
 
 				<section>
 					<section>
@@ -144,6 +161,7 @@ pp Ripper.lex(code)
 						</code></pre>
 					</section>
 				</section>
+
 				<section>
 					<section>
 						<h1>Phasing</h1>
@@ -660,6 +678,7 @@ pp Ripper.sexp(code)
 						</code></pre>
 					</section>
 				</section>
+
 				<section>
 					<section>
 						<h1>Compilation</h1>
@@ -764,6 +783,7 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						</aside>
 					</section>
 				</section>
+
 				<section>
 					<section>
 						<h1>Execution</h1>
@@ -906,6 +926,7 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 						</aside>
 					</section>
 				</section>
+
 				<section>
 					<section>
 						<h1>Control Structures</h1>
@@ -1007,6 +1028,7 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						<img src="img/catch_table.png" />
 					</section>
 				</section>
+
 				<section>
 					<section>
 						<h1>Objects &amp; Class</h1>
@@ -1099,6 +1121,7 @@ SubClass.class_variable_set :@@b
                         </code></pre>
                     </section>
 				</section>
+
                 <section>
                     <section>
                         <h1>Method Lookup &amp; Constant Lookup</h1>
@@ -1232,6 +1255,7 @@ end
                         </aside>
                     </section>
                 </section>
+
                 <section>
                     <section>
                         <h1>Closure</h1>
