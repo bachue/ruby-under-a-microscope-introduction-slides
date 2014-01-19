@@ -15,4 +15,4 @@
   - Metaprogramming
   - GC
 
-[Click to Play the slides](http://bachue.github.io/ruby-under-a-microscope-introduction-slides/img/cover.png)
+[Click to Play the slides](http://bachue.github.io/ruby-under-a-microscope-introduction-slides)
