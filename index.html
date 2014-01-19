@@ -74,8 +74,7 @@
                         <li>Control Structures</li>
                         <li>Objects &amp; Class</li>
                         <li>Method Lookup &amp; Constant Lookup</li>
-                        <li>Closure</li>
-                        <li>Metaprogramming</li>
+                        <li>Closure &amp; Binding</li>
                         <li>GC</li>
                     </ul>
                 </section>
@@ -824,7 +823,7 @@ end
 						<aside class="notes">
 							<p>Local variable table is not a table(Just like C)</p>
 							<p>svar: pointer to special variable table</p>
-							<p>cref: pointer to current lexical scope</p>
+							<p>cref: pointer to current lexical scope(designed for *_eval, *_exec methods)</p>
 							<p>Method Arguments Are Treated Like Local Variables</p>
 						</aside>
 					</section>
@@ -1258,7 +1257,7 @@ end
 
                 <section>
                     <section>
-                        <h1>Closure</h1>
+                        <h1>Closure &amp; Binding</h1>
                     </section>
                     <section>
                         <h3>Block</h3>
@@ -1336,6 +1335,28 @@ function_value.call 'dog'
                         <aside class="notes">
                             Once Ruby creates the new heap copy of the stack (the new <code>rb_env_t</code> structure or internal environment object), it resets the <code>EP</code> in the <code>rb_control_frame_t</code> structure to point to the copy.
                         </aside>
+                    </section>
+                    <section>
+                        <h3>Binding</h3>
+                        <pre><code class="ruby">
+def get_binding
+  a = 2
+  b = 3
+  binding
+end
+
+eval('puts a + b', get_binding)
+                        </code></pre>
+                    </section>
+                    <section>
+                        <h3>rb_binding_t</h3>
+                        <img src="img/rb_binding_t_initialization.png" />
+                        <aside class="notes">
+                            As the implementation of *_eval, *_exec, <code>EP</code> in new rb_control_frame_t points to the lower stack frame. So Ruby can access to local variable directly.
+                        </aside>
+                    </section>
+                    <section>
+                        <img src="img/rb_binding_t.png" />
                     </section>
                 </section>
 			</div>

@@ -11,8 +11,7 @@
   - Control Structures
   - Objects &amp; Class
   - Method Lookup &amp; Constant Lookup
-  - Closure
-  - Metaprogramming
+  - Closure & Binding
   - GC
 
 [Click to Play the slides](http://bachue.github.io/ruby-under-a-microscope-introduction-slides)
