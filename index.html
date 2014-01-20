@@ -1218,7 +1218,10 @@ C.new.f
                         <h3>The Inline Method Cache</h3>
                         <img src="img/inline_method_cache.png" />
                         <aside class="notes">
-                            Any possible method creation, importing or removing will clean all caches.
+                            <ul>
+                                <li>Any possible method creation, importing or removing will clean all caches.</li>
+                                <li>Since 2.1, invalid only sub-classes under effective class</li>
+                            </ul>
                         </aside>
                     </section>
                     <section>
@@ -1372,12 +1375,6 @@ eval('puts a + b', get_binding)
                         <h4>mark-and-sweep garbage collection</h4>
                     </section>
                     <section>
-                        <h3>JRuby &amp; Rubinius</h3>
-                        <h4>copying garbage collection</h4>
-                        <h4>generational garbage collection</h4>
-                        <h4>concurrent garbage collection</h4>
-                    </section>
-                    <section>
                         <h3>RVALUE</h3>
                         <img src="img/first_memory_block_token.png" />
                         <aside class="notes">
@@ -1414,6 +1411,90 @@ eval('puts a + b', get_binding)
                             <ul>
                                 <li>Lazy sweeping sweeps only enough garbage objects back to the free list to create a few new Ruby objects and to allow your program to continue</li>
                                 <li>Lazy sweeping can reduce the amount of time your program is paused waiting for garbage collection; however, it doesn’t reduce the overall amount of garbage collection work to do. Lazy sweeping amortizes the same total amount of sweeping work over multiple GC pauses.</li>
+                            </ul>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>JRuby &amp; Rubinius</h3>
+                        <h4>copying garbage collection</h4>
+                        <h4>generational garbage collection</h4>
+                        <h4>concurrent garbage collection</h4>
+                    </section>
+                    <section>
+                        <h3>Bump Allocation</h3>
+                        <img src="img/gc_bump_allocation.png" />
+                        <aside class="notes">
+                            Copying garbage collection is the ability to create objects of different sizes
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>The Semi-Space Algorithm</h3>
+                        <img src="img/gc_semi_space_algorithm.png" />
+                    </section>
+                    <section>
+                        <h3>Generational Garbage Collection</h3>
+                        <img src="img/gc_promote_old_objects.png" />
+                        <aside class="notes">
+                            JRuby &amp; Rubinius have used it for years. Intrduced into MRI since 2.1.
+                            <ul>
+                                <li>Keywords: minor GC, major GC</li>
+                                <li>Popular Algorithms combination: minor: Copy, major: Mark &amp; Sweep</li>
+                                <li>MRI 2.1: both Mark &amp; Sweep</li>
+                                <li>Promotion: Rubinius: 2, MRI 2.1: 1(limited by Mark &amp; Sweep), JRuby: dynamic</li>
+                                <li>JRuby: another "permanent generation" for internal objects for JVM ifself</li>
+                                <li>Rubinius: Also uses a third generation for very large objects by Mark &amp; Sweep</li>
+                            </ul>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Since 2.1, RGenGC</h3>
+                        <h4>Restricted Generational Garbage Collection</h4>
+                        <img src="img/generational_gc_problem.png" />
+                    </section>
+                    <section>
+                        <h3>Write barries</h3>
+                        <img src="img/gc_write_barries.png" />
+                        <aside class="notes">
+                            Ruby 2.1 uses an old GC technique called write barriers to monitor changes to mature objects – whenever you add a reference from one object to another (whenever you write to or modify an object), a write barrier is triggered. The barriers check whether the source object is mature, and if so adds the mature object to a special list. Later Ruby 2.1 includes these just these modified mature objects in the next mark and sweep process, preventing active, young objects from being incorrectly considered garbage.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3><a href="http://www.ustream.tv/recorded/35107339/highlight/377033">
+                            Koichi’s fascinating presentation from EuRuKo 2013
+                        </a></h3>
+                        <aside class="notes">
+                            Difficult to implement WB in C-ext, watch the video for more details!
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Concurrect Garbage Collection</h3>
+                        <aside class="notes">
+                            <ul>
+                                <li>Run GC on separate thread</li>
+                                <li>Since 2.1, MRI reduce sweeping time by introducing this tech</li>
+                            </ul>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Marking While the Object Graph Changes</h3>
+                        <img src="img/gc_concurrent_gc_problem.png" />
+                        <aside class="notes">
+                            New object hasn't been marked here, so it'll be GCed!
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Tricolor Marking</h3>
+                        <img src="img/gc_tricolor_marking.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>White: haven't been marked, all objects start from here.</li>
+                                <li>Grey: reachable, but we still need to check any objects that the object references</li>
+                                <li>Black: marked, have no references to objects in the white set, surely won't be GCed</li>
+                                <li>Pick an object from the grey set. Blacken this object (move it to the black set), by greying all the white objects it references directly</li>
+                                <li>Repeat the previous step until the grey set is empty</li>
+                                <li>When there are no more objects in the grey set, then all the objects remaining in the white set will be GCed</li>
+                                <li style="color: red">The collector moves a marked object back to the mark stack because the application modified it.</li>
+                                <li style="color: red">Write barriers are used by both generational and concurrent garbage collectors.</li>
                             </ul>
                         </aside>
                     </section>
