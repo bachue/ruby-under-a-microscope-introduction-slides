@@ -1127,7 +1127,7 @@ SubClass.class_variable_set :@@b
                     </section>
                     <section>
                         <h3>Module</h3>
-                        <h4>There's no RModule in MRI Ruby</h4>
+                        <h4>There's no RModule in MRI</h4>
                     </section>
                     <section>
                         <img src="img/r_class_for_module.png" />
@@ -1357,6 +1357,65 @@ eval('puts a + b', get_binding)
                     </section>
                     <section>
                         <img src="img/rb_binding_t.png" />
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h1>GC</h1>
+                    </section>
+                    <section>
+                        <h3>Algorithms</h3>
+                    </section>
+                    <section>
+                        <h3>MRI</h3>
+                        <h4>mark-and-sweep garbage collection</h4>
+                    </section>
+                    <section>
+                        <h3>JRuby &amp; Rubinius</h3>
+                        <h4>copying garbage collection</h4>
+                        <h4>generational garbage collection</h4>
+                        <h4>concurrent garbage collection</h4>
+                    </section>
+                    <section>
+                        <h3>RVALUE</h3>
+                        <img src="img/first_memory_block_token.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>RVALUE as a basic unit</li>
+                                <li>RVALUE: gc.c:325</li>
+                            </ul>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Mark</h3>
+                        <img src="img/mri_gc_marking.png" />
+                        <aside class="notes">
+                            MRI has marked five active objects (gray) with five garbage objects remaining in the heap (white).
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Since 2.0, Bitmap Marking</h3>
+                        <img src="img/mri_gc_bitmap_marking.png" />
+                        <aside class="notes">
+                            Since 2.0, because of Unix memory optimization technique "copy on write" when fork.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Sweeping</h3>
+                        <img src="img/mri_gc_sweeping.png" />
+                        <aside class="notes">
+                            While sweeping, MRI places unused RVALUE structures back on the free list.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Since 1.9.3, Lazy Sweeping</h3>
+                        <aside class="notes">
+                            <ul>
+                                <li>Lazy sweeping sweeps only enough garbage objects back to the free list to create a few new Ruby objects and to allow your program to continue</li>
+                                <li>Lazy sweeping can reduce the amount of time your program is paused waiting for garbage collection; however, it doesn’t reduce the overall amount of garbage collection work to do. Lazy sweeping amortizes the same total amount of sweeping work over multiple GC pauses.</li>
+                            </ul>
+                        </aside>
                     </section>
                 </section>
 			</div>
