@@ -58,8 +58,11 @@
 						<li>No C programming knowledge is required</li>
 					</ul>
                     <aside class="notes">
-                        <p>No Ruby basis explaination in these slides!</p>
-                        <p>No C code shown in these slides!</p>
+                        <ul>
+                            <li>No Ruby basis explaination in these slides!</li>
+                            <li>Only for Ruby programmer who shows strong interest in Ruby internal!</li>
+                            <li>No C code shown in these slides!</li>
+                        </ul>
                     </aside>
 				</section>
 
@@ -77,20 +80,39 @@
                         <li>Closure &amp; Binding</li>
                         <li>GC</li>
                     </ul>
+                    <aside class="notes">
+                        Basically map to each characters in the book, just a little changes.
+                    </aside>
                 </section>
 
 				<section>
 					<section>
 						<h1>Overview</h1>
 						<img src="img/overview.png" />
+                        <aside class="notes">
+                            Tokenize, Parse, Compile =&gt; YARV instruments
+                        </aside>
 					</section>
 					<section>
 						<h1>JRuby</h1>
 						<img src="img/jruby-overview.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>Steps are similar, except JVM bytecode is generated</li>
+                                <li>Jay is Bison-like but written in Java</li>
+                                <li>JIT in Java could compile bytecode to machine language</li>
+                            </ul>
+                        </aside>
 					</section>
 					<section>
 						<h1>Rubinius</h1>
 						<img src="img/rubinius-overview.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>Steps are similar, except Rubinius instruments and LLV instruments are generated</li>
+                                <li>Rubinius compile Ruby to Rubinius instruments, and then use LLVM compile them to LLVM instruments, then may compile to machine language by JIT compiler</li>
+                            </ul>
+                        </aside>
 					</section>
 				</section>
 
@@ -121,23 +143,26 @@ end
 						</aside>
 					</section>
 					<section>
-						<h3>Ripper.lex</h3>
+						<h3>Ripper.tokenize &amp; Ripper.lex</h3>
 						<pre><code class="ruby">
 require 'ripper'
 require 'pp'
-code = &lt;&lt;STR
+code = &lt;&lt;-STR
   10.times do |n|
     puts n
   end
 STR
+p Ripper.tokenize(code)
 pp Ripper.lex(code)
 						</code></pre>
 						<aside class="notes">
-							Ripper allows you to call the same tokenization and parsing code that Ruby uses to process text from code files.
+							Ripper, which was provided since 1.9, allows you to call the same tokenization and parsing code that Ruby uses to process text from code files.
 						</aside>
 					</section>
 					<section>
 						<pre><code class="ruby" style="max-height: inherit;">
+["  ", "10", ".", "times", " ", "do", " ", "|", "n", "|", "\n", "    ", "puts", " ", "n", "\n", "  ", "end", "\n"]
+
 [[[1, 0], :on_sp, "  "],
  [[1, 2], :on_int, "10"],
  [[1, 4], :on_period, "."],
@@ -158,21 +183,29 @@ pp Ripper.lex(code)
  [[3, 2], :on_kw, "end"],
  [[3, 5], :on_nl, "\n"]]
 						</code></pre>
+                        <aside class="notes">
+                            Result
+                        </aside>
 					</section>
 				</section>
 
 				<section>
 					<section>
 						<h1>Phasing</h1>
-						<h2>LALR</h2>
-						<h2>Bison</h2>
+						<h2>LALR, Bison</h2>
+                        <aside class="notes">
+                            MRI uses GNU Bison to generate the parser code, from <code>parse.y</code> to <code>parse.c</code>
+                        </aside>
 					</section>
 					<section>
-						<h3>Spanish => English Example</h3>
+						<h3>Spanish =&gt; English Example</h3>
 						<pre><code class="asciidoc">
 Me gusta el Ruby. => I Like Ruby.
 Le gusta el Ruby. => She likes Ruby.
 						</code></pre>
+                        <aside class="notes">
+                            An Simple Example
+                        </aside>
 					</section>
 					<section>
 						<h3>Bison/Yacc grammar</h3>
@@ -190,6 +223,9 @@ ILike: me gusta {
   $$ = "I like";
 }
 						</code></pre>
+                        <aside class="notes">
+                            Grammar Rule
+                        </aside>
 					</section>
 					<section>
 						<h3>Simplified Steps</h3>
@@ -241,7 +277,11 @@ ILike: me gusta {
 							</tr>	
 						</table>
 						<aside class="notes">
-							LALR Goto Table
+                            <ul>
+                                <li>Looks too simple to explain</li>
+                                <li>But LALR is very complicated actually we must follow LALR Goto Table</li>
+                                <li>No real Ruby example here, let's have a glance at the real code</li>
+                            </ul>
 						</aside>
 					</section>
 					<section>
@@ -258,9 +298,12 @@ ILike: me gusta {
   puts n
 end
 						</code></pre>
+                        <aside class="notes">
+                            Another example
+                        </aside>
 					</section>
 					<section>
-						<pre><code class="asciidoc">
+						<pre><code class="asciidoc" style="max-height: 600px;">
 Starting parse
 Entering state 0
 Reducing stack by rule 1 (line 782):
@@ -609,7 +652,7 @@ Cleanup: popping nterm program ()
 						<pre><code class="ruby">
 require 'ripper'
 require 'pp'
-code = &lt;&lt;STR
+code = &lt;&lt;-STR
   10.times do |n|
     puts n
   end
@@ -617,6 +660,9 @@ STR
 puts code
 pp Ripper.sexp(code)
 						</code></pre>
+                        <aside class="notes">
+                            Parse source code and create S-exp tree.
+                        </aside>
 					</section>
 					<section>
 						<pre><code class="ruby">
@@ -634,7 +680,7 @@ pp Ripper.sexp(code)
 					</section>
 					<section>
 						<h3>ruby --dump parsetree</h3>
-						<pre><code class="asciidoc">
+						<pre><code class="asciidoc" style="max-height: 600px;">
 @ NODE_SCOPE (line: 3)
 +- nd_tbl: (empty)
 +- nd_args:
@@ -685,10 +731,16 @@ pp Ripper.sexp(code)
 					<section>
 						<h3>Ruby 1.8</h3>
 						<img src="img/ruby-18-layers.png" />
+                        <aside class="notes">
+                            No compilation in Ruby 1.8, Ruby 1.8 execute AST directly.
+                        </aside>
 					</section>
 					<section>
 						<h3>Ruby 1.9 &amp; 2.0</h3>
 						<img src="img/ruby-19-20-layers.png" />
+                        <aside class="notes">
+                            Ruby 1.9 compiles Ruby code to YARV instruments.
+                        </aside>
 					</section>
 					<section>
 						<h3>Benchmark</h3>
@@ -698,10 +750,17 @@ while i &lt; ARGV[0].to_i
   i += 1
 end
 						</code></pre>
+                        <aside class="notes">
+                            Performance competition between AST and YARV instruments.
+                        </aside>
 					</section>
 					<section>
 						<h3>logarithmic scale</h3>
 						<img src="img/ruby-logarithmic-performance.png" />
+                        <aside class="notes">
+                            You can see that for short-lived processes, Ruby 1.8.7 is actually faster than Ruby 1.9.3 and 2.0 because there is no need to compile the Ruby code into YARV instructions.
+                            However, after about 11,000 iterations, Ruby 1.9.3 and 2.0 are faster.
+                        </aside>
 					</section>
 					<section>
 						<h3>linear scale</h3>
@@ -714,7 +773,7 @@ end
 						</aside>
 					</section>
 					<section>
-						<h3>Example</h3>
+						<h3>Displaying YARV Instructions</h3>
 						<pre><code class="ruby">
 code = &lt;&lt;-RUBY
   puts 1 + 2
@@ -736,11 +795,15 @@ puts RubyVM::InstructionSequence.compile(code).disasm
 0010 leave
 						</code></pre>
 						<aside class="notes">
-							Stack machine
+                            <ul>
+							    <li>Execute in Stack machine</li>
+                                <li><code>putobject_OP_INT2FIX_O_1_C_</code> is equivalent to <code>putobject 1</code></li>
+                                <li>ARGS_SKIP indicates the arguments are simple values (not blocks or arrays of unnamed arguments), allowing YARV to skip some work it would have to do otherwise.</li>
+                            </ul>
 						</aside>
 					</section>
 					<section>
-						<h3>Example 2</h3>
+						<h3>Another Example</h3>
 						<pre><code class="ruby">
 code = &lt;&lt;-RUBY
   10.times do |n|
@@ -778,7 +841,11 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 0011 leave                                                            (   2)
 						</code></pre>
 						<aside class="notes">
-							Local variable
+                            <ul>
+    							<li>Notice Local variable</li>
+                                <li><code>getlocal_OP__WC__0</code> is equivalent to <code>getlocal *, 0</code></li>
+                                <li>This trick allows Ruby 2.0 to save a bit of time because it doesn’t need to pass the 0 argument separately.</li>
+                            </ul>
 						</aside>
 					</section>
 				</section>
@@ -791,10 +858,20 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 					<section>
 						<h3>rb_control_frame_t</h3>
 						<img src="img/rb_control_frame_t-1.png" />
+                        <aside class="notes">
+                            pc, sp, self, type(frame type)
+                        </aside>
 					</section>
 					<section>
 						<h3>caller</h3>
 						<img src="img/rb_control_frame_t-2.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>Just like we call <code>caller</code></li>
+                                <li>CFP =&gt; current frame pointer</li>
+                                <li>Ruby always creates this frame first when starting a new program. At the top of the stack, at least initially, a frame of type EVAL corresponds to the top level or main scope of the Ruby script.</li>
+                            </ul>
+                        </aside>
 					</section>
 					<section>
 						<h3>Example</h3>
@@ -814,17 +891,22 @@ end
 						<h3>Environment Pointer</h3>
 						<img src="img/local_variable_1.png" />
 						<aside class="notes">
-							EP = SP - 1
-							Special: to track information related to blocks(rb_block_t).
+                            <ul>
+    							<li>EP = SP - 1</li>
+    							<li>Special: to track information related to blocks(rb_block_t).</li>
+                            </ul>
 						</aside>
 					</section>
 					<section>
 						<img src="img/local_variable_2.png" />
 						<aside class="notes">
-							<p>Local variable table is not a table(Just like C)</p>
-							<p>svar: pointer to special variable table</p>
-							<p>cref: pointer to current lexical scope(designed for *_eval, *_exec methods)</p>
-							<p>Method Arguments Are Treated Like Local Variables</p>
+                            <ul>
+    							<li>Local variable table is not a table(Just like Stack variable in C)</li>
+                                <li>special: to track information related to blocks(rb_block_t) (doesn't mean special variable table).</li>
+    							<li>svar: pointer to special variable table(only for ruby method call)</li>
+    							<li>cref: pointer to current lexical scope(designed for *_eval, *_exec methods, only for block call)</li>
+    							<li>Method Arguments Are Treated Like Local Variables</li>
+                            </ul>
 						</aside>
 					</section>
 					<section>
@@ -872,9 +954,15 @@ local table (size: 2, argc: 0 [opts: 0, rest: -1, post: 0, block: -1] s1)
 0009 trace            512                                             (   5)
 0011 leave                                                            (   4)
 						</code></pre>
+                        <aside class="notes">
+                            <code>setlocal_OP__WC__0</code> is the same as <code>setlocal *, 0</code>
+                        </aside>
 					</section>
 					<section>
 						<img src="img/dynamic_variable.png" />
+                        <aside class="notes">
+                            <code>getlocal_OP__WC__1 2</code> means to follow Previous EP once, then minus 2
+                        </aside>
 					</section>
 					<section>
 						<h3>Special Variable Access</h3>
@@ -897,6 +985,9 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 					</section>
 					<section>
 						<img src="img/special_variable_1.png" />
+                        <aside class="notes">
+                            Each method call has its own special variable table
+                        </aside>
 					</section>
 					<section>
 						<h3>Guess Again?</h3>
@@ -915,13 +1006,19 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
 					</section>
 					<section>
 						<img src="img/special_variable_2.png" />
+                        <aside class="notes">
+                            When it's a block call, <code>EP - 1</code> is <code>cref</code>, means Lexical Scope.
+                        </aside>
 					</section>
 					<section>
 						<h3>YARV Instruments Definitions</h3>
+                        <h4>tool/insns2vm.rb: insns.def =&gt; vm.inc</h4>
 						<aside class="notes">
-							<div>tool/insns2vm.rb</div>
-							<div>insns.def</div>
-							<div>vm.inc</div>
+                            <ul>
+    							<li>Generator: tool/insns2vm.rb, Run by miniruby during the build process</li>
+    							<li>Instruments Definition: insns.def</li>
+    							<li>After compilation: vm.inc, code we really execute</li>
+                            </ul>
 						</aside>
 					</section>
 				</section>
@@ -952,7 +1049,7 @@ puts RubyVM::InstructionSequence.compile(code).disasm
 						</code></pre>
 					</section>
 					<section>
-						<pre><code class="asciidoc">
+						<pre><code class="asciidoc" style="max-height: 600px;">
 == disasm: &lt;RubyVM::InstructionSequence:&lt;compiled&gt;@&lt;compiled&gt;&gt;==========
 == catch table
 | catch type: break  st: 0035 ed: 0039 sp: 0000 cont: 0039
@@ -1021,10 +1118,20 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 0018 trace            512                                             (   8)
 0020 leave                                                            (   7)
 						</code></pre>
+                        <aside class="notes">
+                            <ul>
+                                <li>if: branchunless</li>
+                                <li>while: branchif</li>
+                                <li>for: equivalent to <code>(0..3).each</code></li>
+                            </ul>
+                        </aside>
 					</section>
 					<section>
 						<h3>Catch table</h3>
 						<img src="img/catch_table.png" />
+                        <aside class="notes">
+                            From up to down, ask one by one
+                        </aside>
 					</section>
 				</section>
 
@@ -1034,9 +1141,10 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 					</section>
 					<section>
 						<h3>RObject</h3>
+                        <h4>includes/ruby/ruby.h</h4>
 						<img src="img/r_object.png" />
 						<aside class="notes">
-							<p>At the top of the figure is a pointer to the RObject structure. (Internally, Ruby always refers to any value with a VALUE pointer.) Below this pointer, the RObject structure contains an inner RBasic structure and information spe- cific to custom objects. The RBasic sec- tion contains information that all values use: a set of Boolean values called flags that store a variety of internal technical values, and a class pointer called klass.</p>
+							<p>At the top of the figure is a pointer to the RObject structure. (Internally, Ruby always refers to any value with a VALUE pointer.) Below this pointer, the RObject structure contains an inner RBasic structure and information specific to custom objects. The RBasic section contains information that all values use: a set of Boolean values called flags that store a variety of internal technical values, and a class pointer called klass.</p>
 							<p>The class pointer indicates which class an object is an instance of. In the RObject section, Ruby saves an array of instance variables that each object contains, using numiv, the instance variable count, and ivptr, a pointer to an array of values.</p>
                             <p>RBasic: includes/ruby/ruby.h:747</p>
                             <p>RObject: includes/ruby/ruby.h:762</p>
@@ -1060,6 +1168,9 @@ euclid.first_name = 'Euclid'
 					</section>
 					<section>
 						<img src="img/r_object_example.png" />
+                        <aside class="notes">
+                            As you can see, instance variable names are not stored in RObject
+                        </aside>
 					</section>
                     <section>
                         <h3>Instance Variable Access</h3>
@@ -1080,7 +1191,10 @@ euclid.first_name = 'Euclid'
 						<h3>Fixnum</h3>
 						<img src="img/fixnum_object.png" />
 						<aside class="notes">
-							Symbol, NilClass, TrueClass, FalseClass has their owned flags.
+                            <ul>
+    							<li>Symbol, NilClass, TrueClass, FalseClass has their owned flags.</li>
+                                <li>Float uses double internally, so it has its own class.</li>
+                            </ul>
 						</aside>
 					</section>
 					<section>
@@ -1101,10 +1215,20 @@ euclid.first_name = 'Euclid'
                     <section>
                         <h3>Class Instance Variable Access</h3>
                         <img src="img/class_instance_variable.png" />
+                        <aside class="notes">
+                            <ul>
+                                <li>Both class instance variables and class variables are stored in class-level instance variable table</li>
+                                <li>But use two different algorithm</li>
+                                <li>Class instance variable is just stored in RClass simply.</li>
+                            </ul>
+                        </aside>
                     </section>
                     <section>
                         <h3>Class Variable Access</h3>
                         <img src="img/class_variable.png" />
+                        <aside class="notes">
+                            Ruby search through RClass superclass chain for the Class variable.
+                        </aside>
                     </section>
                     <section>
                         <h3>Guess?</h3>
@@ -1118,6 +1242,9 @@ SubClass.class_variable_set :@@b, 'b'
 SuperClass.class_variable_set :@@b, 'a'
 SubClass.class_variable_set :@@b
                         </code></pre>
+                        <aside class="notes">
+                            But Ruby always use the variable which is the super class even subclass has the same class variable.
+                        </aside>
                     </section>
 				</section>
 
@@ -1131,6 +1258,9 @@ SubClass.class_variable_set :@@b
                     </section>
                     <section>
                         <img src="img/r_class_for_module.png" />
+                        <aside class="notes">
+                            Share data structure(RClass) with class
+                        </aside>
                     </section>
                     <section>
                         <h3>Include Module in a Class</h3>
@@ -1145,29 +1275,38 @@ end
                     </section>
                     <section>
                         <img src="img/include_a_module_in_class.png" />
+                        <aside class="notes">
+                            Ruby just copy the RClass object and insert it into the linked list between the class and its superclass.
+                        </aside>
                     </section>
                     <section>
                         <h3>Include one Module into Another</h3>
                         <img src="img/include_multi_modules_in_class.png" />
+                        <aside class="notes">
+                            In that case, just copy the entire module tree.
+                        </aside>
                     </section>
                     <section>
                         <h3>Prepend Module in a Class</h3>
                         <img src="img/prepend_module_in_class.png" />
                         <aside class="notes">
+                            Since 2.0
                             Why does this design so tricky? Why not make it just direct? If we call method on this class directly, we won't find it if it is defined in prepended module.
                         </aside>
                     </section>
                     <section>
                         <h3>Guess: Does it work?</h3>
                         <pre><code class="ruby">
+module A; end
+
+class C
+  include A
+end
+
 module A
   def f
     'module A'
   end
-end
-
-class C
-  include A
 end
 
 C.new.f
@@ -1199,7 +1338,12 @@ end
 C.new.f
                         </code></pre>
                         <aside class="notes">
-                            <p>No, <code>module B</code> has been copyed, it can't include module A in its copy.</p>
+                            <p>No, module <code>B</code> has been copyed, it can't include module <code>A</code> in its copy.</p>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>rb_include_module in class.c</h3>
+                        <aside class="notes">
                             <p>rb_include_module: class.c:823</p>
                             <p>include_modules_at: class.c:848</p>
                             <p>rb_include_class_new: class.c:788</p>
@@ -1227,9 +1371,15 @@ C.new.f
                     <section>
                         <h3>Lexical Scope</h3>
                         <img src="img/lexical_scope.png" />
+                        <aside class="notes">
+                            Source code - class - lexical scope
+                        </aside>
                     </section>
                     <section>
                         <h3>Constant Access</h3>
+                        <aside class="notes">
+                            We will talk about the algorithm of Constant search
+                        </aside>
                     </section>
                     <section>
                         <h3>Guess?</h3>
@@ -1249,10 +1399,10 @@ end
                         <aside class="notes">
                             <ul>
                                 <li>search through lexical scope chain</li>
-                                <li>for each scope's class, check for autoload</li>
+                                <li>for each scope's class, if no constant found, check for autoload</li>
                                 <li>search through superclass chain</li>
-                                <li>for each superclass, check for autoload</li>
-                                <li>call const_missing</li>
+                                <li>for each superclass, if no constant found, check for autoload</li>
+                                <li>if still no constant found, call const_missing</li>
                             </ul>
                         </aside>
                     </section>
@@ -1270,6 +1420,9 @@ end
   puts str
 end
                         </code></pre>
+                        <aside class="notes">
+                            We will talk about initialization of <code>rb_block_t</code>.
+                        </aside>
                     </section>
                     <section>
                         <img src="img/rb_block_t_initialization.png" />
@@ -1277,9 +1430,16 @@ end
                             <ul>
                                 <li>Before call <code>times</code> method, Ruby creates and initializes a new <code>rb_block_t</code> structure to represent the block. Copy the current <code>EP</code> into it.</li>
                                 <li>When <code>yield</code> is called, Ruby can access local variables directly from <code>rb_control_frame_t</code> structure, and access variables from the parent scope indirectly from <code>EP</code> in the block using dynamic variable access.
+                                <li>Ruby doesn't really allocate memory for and initialize <code>rb_block_t</code>, just references subset of <code>rb_control_frame_t</code>, that's why block is not really an Object.
+                            </ul>
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>vm_core.h</h3>
+                        <aside class="notes">
+                            <ul>
                                 <li>rb_control_frame_t: vm_core.h:445</li>
                                 <li>rb_block_t: vm_core.h:462</li>
-                                <li>Ruby doesn't really allocate memory for and initialize <code>rb_block_t</code>, just references subset of <code>rb_control_frame_t</code>, that's why block is not really an Object.
                             </ul>
                         </aside>
                     </section>
@@ -1296,6 +1456,9 @@ end
 function_value = message_function
 function_value.call 'dog'
                         </code></pre>
+                        <aside class="notes">
+                            Then let's talk about lambda.
+                        </aside>
                     </section>
                     <section>
                         <h3>rb_lambda_t?</h3>
@@ -1319,6 +1482,9 @@ function_value.call 'dog'
                     <section>
                         <h3>Proc is an Object</h3>
                         <img src="img/rb_proc_t.png" />
+                        <aside class="notes">
+                            Block is not an Object, but Proc is.
+                        </aside>
                     </section>
                     <section>
                         <h3>Guess?</h3>
@@ -1373,9 +1539,13 @@ eval('puts a + b', get_binding)
                     <section>
                         <h3>MRI</h3>
                         <h4>mark-and-sweep garbage collection</h4>
+                        <aside class="notes">
+                            Non-Moving strategy
+                        </aside>
                     </section>
                     <section>
                         <h3>RVALUE</h3>
+                        <h4>gc.c</h4>
                         <img src="img/first_memory_block_token.png" />
                         <aside class="notes">
                             <ul>
@@ -1430,6 +1600,9 @@ eval('puts a + b', get_binding)
                     <section>
                         <h3>The Semi-Space Algorithm</h3>
                         <img src="img/gc_semi_space_algorithm.png" />
+                        <aside class="notes">
+                            Moving strategy
+                        </aside>
                     </section>
                     <section>
                         <h3>Generational Garbage Collection</h3>
@@ -1488,16 +1661,18 @@ eval('puts a + b', get_binding)
                         <aside class="notes">
                             <ul>
                                 <li>White: haven't been marked, all objects start from here.</li>
-                                <li>Grey: reachable, but we still need to check any objects that the object references</li>
+                                <li>Grey: reachable, won't be GCed, but we still need to check any objects that the object references</li>
                                 <li>Black: marked, have no references to objects in the white set, surely won't be GCed</li>
                                 <li>Pick an object from the grey set. Blacken this object (move it to the black set), by greying all the white objects it references directly</li>
                                 <li>Repeat the previous step until the grey set is empty</li>
                                 <li>When there are no more objects in the grey set, then all the objects remaining in the white set will be GCed</li>
                                 <li style="color: red">The collector moves a marked object back to the mark stack because the application modified it.</li>
-                                <li style="color: red">Write barriers are used by both generational and concurrent garbage collectors.</li>
                             </ul>
                         </aside>
                     </section>
+                </section>
+                <section>
+                    <h1>Thanks!</h1>
                 </section>
 			</div>
 		</div>
