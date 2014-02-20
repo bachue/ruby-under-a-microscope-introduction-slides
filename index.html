@@ -1150,7 +1150,11 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
 						<h3>Catch table</h3>
 						<img src="img/catch_table.png" />
                         <aside class="notes">
-                            From up to down, ask one by one
+                            <ul>
+                                <li><code>break</code>, <code>redo</code>, <code>next</code> are not implemented by <code>jump</code></li>
+                                <li>From up to down, ask one by one</li>
+                                <li>assume there's a <code>break</code> or <code>redo</code> or <code>next</code> in <code>for</code> statement in the last example.</li>
+                            </ul>
                         </aside>
 					</section>
 				</section>
