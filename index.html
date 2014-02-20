@@ -36,7 +36,11 @@
 						<small>Created by <a href="http://bachue.is-programmer.com">Bachue</a> / <a href="http://twitter.com/iBachue">@iBachue</a></small>
 					</p>
 					<aside class="notes">
-						I'll introduce some points in this book to you.
+                        <ul>
+                            <li>Just a share.</li>
+    						<li>I'll introduce some points in this book to you.</li>
+                            <li>Don't ask me tough questions, I can't answer then. :)</li>
+                        </ul>
 					</aside>
 				</section>
 
@@ -722,7 +726,17 @@ pp Ripper.sexp(code)
                 +- nd_next:
                     (null node)
 						</code></pre>
+                        <aside class="notes">
+                            Also shows node info, which is very related to the implementation.
+                        </aside>
 					</section>
+                    <section>
+                        <h3>Equivalent AST nodes</h3>
+                        <img src="img/ruby-ast-example.png" />
+                        <aside class="notes">
+                            NODE_LIT means literal.
+                        </aside>
+                    </section>
 				</section>
 
 				<section>
@@ -768,12 +782,6 @@ end
 						<img src="img/ruby-linear-performance.png" />
 					</section>
 					<section>
-						<h3>iseq_compile_each in compile.c</h3>
-						<aside class="notes">
-							<p>compile.c:3191</p>
-						</aside>
-					</section>
-					<section>
 						<h3>Displaying YARV Instructions</h3>
 						<pre><code class="ruby">
 code = &lt;&lt;-RUBY
@@ -800,6 +808,7 @@ puts RubyVM::InstructionSequence.compile(code).disasm
 							    <li>Execute in Stack machine</li>
                                 <li><code>putobject_OP_INT2FIX_O_1_C_</code> is equivalent to <code>putobject 1</code></li>
                                 <li>ARGS_SKIP indicates the arguments are simple values (not blocks or arrays of unnamed arguments), allowing YARV to skip some work it would have to do otherwise.</li>
+                                <li>MRI traverses the AST nodes(result of <code>ruby -y</code>) and generate these instruments.</li>
                             </ul>
 						</aside>
 					</section>
@@ -849,6 +858,13 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
                             </ul>
 						</aside>
 					</section>
+                    <section>
+                        <h3>iseq_compile_each in compile.c</h3>
+                        <aside class="notes">
+                            <p>How Ruby interates thought the AST</p>
+                            <p>compile.c:3191</p>
+                        </aside>
+                    </section>
 				</section>
 
 				<section>
@@ -870,7 +886,6 @@ local table (size: 2, argc: 1 [opts: 0, rest: -1, post: 0, block: -1] s3)
                             <ul>
                                 <li>Just like we call <code>caller</code></li>
                                 <li>CFP =&gt; current frame pointer</li>
-                                <li>Ruby always creates this frame first when starting a new program. At the top of the stack, at least initially, a frame of type EVAL corresponds to the top level or main scope of the Ruby script.</li>
                             </ul>
                         </aside>
 					</section>
@@ -884,6 +899,9 @@ end
 					</section>
 					<section>
 						<img src="img/rb_control_frame_t-3.png" />
+                        <aside class="notes">
+                            <p>Ruby always creates "TOP" frame first when starting a new program. At the top of the stack, at least initially, a frame of type "EVAL" corresponds to the top level or main scope of the Ruby script.</p>
+                        </aside>
 					</section>
 					<section>
 						<h3>Local Variable Access</h3>
@@ -975,10 +993,10 @@ str = "The quick brown fox jumped over the lazy dog.\n"
 /fox/.match(str)
 def search(str)
   /dog/.match(str)
-  puts "Value of $&amp; inside method: \#{$&amp;}"
+  puts "Value of $&amp; inside method: #{$&amp;}"
 end
 search(str)
-puts "Value of $&amp; in the top level scope: \#{$&amp;}"
+puts "Value of $&amp; in the top level scope: #{$&amp;}"
 						</code></pre>
 						<aside class="notes">
 							Guess: What's the answer?
@@ -997,9 +1015,9 @@ str = "The quick brown fox jumped over the lazy dog.\n"
 /fox/.match(str)
 2.times do
   /dog/.match(str)
-  puts "Value of $&amp; inside block: \#{$&amp;}"
+  puts "Value of $&amp; inside block: #{$&amp;}"
 end
-puts "Value of $&amp; in the top level scope: \#{$&amp;}"
+puts "Value of $&amp; in the top level scope: #{$&amp;}"
 						</code></pre>
 						<aside class="notes">
 							Guess: What's the answer?
@@ -1018,6 +1036,7 @@ puts "Value of $&amp; in the top level scope: \#{$&amp;}"
                             <ul>
     							<li>Generator: tool/insns2vm.rb, Run by miniruby during the build process</li>
     							<li>Instruments Definition: insns.def</li>
+                                <li>insns.def is not C code</li>
     							<li>After compilation: vm.inc, code we really execute</li>
                             </ul>
 						</aside>
