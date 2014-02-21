@@ -1314,8 +1314,11 @@ end
                         <h3>Prepend Module in a Class</h3>
                         <img src="img/prepend_module_in_class.png" />
                         <aside class="notes">
-                            Since 2.0
-                            Why does this design so tricky? Why not make it just direct? If we call method on this class directly, we won't find it if it is defined in prepended module.
+                            <ul>
+                                <li>Since 2.0</li>
+                                <li>When you prepend a module, Ruby creates a copy of the target class and set it as the superclass of the prepended module. And move all methods from the original class to the copy.</li>
+                                <li>Why does this design so tricky? Why not move prepended module as the subclass of the class? If we call method on this class directly, we won't find it if it is defined in prepended module.</li>
+                            </ul>
                         </aside>
                     </section>
                     <section>
