@@ -1467,6 +1467,7 @@ end
                             <ul>
                                 <li>rb_control_frame_t: vm_core.h:445</li>
                                 <li>rb_block_t: vm_core.h:462</li>
+                                <li><code>proc</code> in rb_block_t is used when Ruby creates proc object from a block</li>
                             </ul>
                         </aside>
                     </section>
@@ -1529,8 +1530,63 @@ function_value = message_function
 function_value.call 'dog'
                         </code></pre>
                         <aside class="notes">
-                            Once Ruby creates the new heap copy of the stack (the new <code>rb_env_t</code> structure or internal environment object), it resets the <code>EP</code> in the <code>rb_control_frame_t</code> structure to point to the copy.
+                            <ul>
+                                <li>Once Ruby creates the new heap copy of the stack (the new <code>rb_env_t</code> structure or internal environment object), it resets the <code>EP</code> in the <code>rb_control_frame_t</code> structure to point to the copy.</li>
+                                <li>Each block you pass to the lambdas accesses the same variable in the parent scope. Ruby achieves this by checking whether the EP already points to the heap. So if you create multiple lambdas in the same scope, Ruby won't create the second copy, it will reuse the same <code>rb_env_t</code> structure in the second <code>rb_proc_t</code> structure.</li>
+                            </ul>
                         </aside>
+                    </section>
+                    <section>
+                        <h3>Benchmark</h3>
+                        <pre><code class="ruby" style="max-height: 600px;">
+require 'benchmark'
+ITERATIONS = 1000000
+Benchmark.bm do |bench|
+  bench.report("While") do
+    ITERATIONS.times do
+      sum = 0
+      i= 1
+      while i &lt;= 10
+        sum += i
+        i += 1 
+      end
+    end
+  end
+
+  bench.report("Block") do
+    ITERATIONS.times do
+      sum = 0
+      (1..10).each do |i|
+        sum += i
+      end
+    end
+  end
+
+  bench.report("Lambda") do
+    ITERATIONS.times do
+      sum = 0
+
+      blk = lambda do |i|
+        sum += i
+      end
+
+      (1..10).each(&amp;blk)
+    end
+  end
+end
+                        </code></pre>
+                        <aside class="notes">
+                            Let's see a performance benchmark between while, block and lambda.
+                        </aside>
+                    </section>
+                    <section>
+                        <h3>Result</h3>
+                        <pre><code class="asciidoc">
+        user       system      total        real
+While   0.480000   0.000000   0.480000 (  0.479636)
+Block   0.900000   0.000000   0.900000 (  0.899904)
+Lambda  1.720000   0.050000   1.770000 (  1.763199)
+                        </code></pre>
                     </section>
                     <section>
                         <h3>Binding</h3>
@@ -1546,13 +1602,16 @@ eval('puts a + b', get_binding)
                     </section>
                     <section>
                         <h3>rb_binding_t</h3>
-                        <img src="img/rb_binding_t_initialization.png" />
+                        <img src="img/rb_binding_t_initialization.png" height="600" />
                         <aside class="notes">
                             As the implementation of *_eval, *_exec, <code>EP</code> in new rb_control_frame_t points to the lower stack frame. So Ruby can access to local variable directly.
                         </aside>
                     </section>
                     <section>
                         <img src="img/rb_binding_t.png" />
+                        <aside class="notes">
+                            The binding structure is simply a wrapper around the internal environment structure—the heap copy of the stack frame. The binding structure also contains the file name and line number of the loca- tion from where you called binding.
+                        </aside>
                     </section>
                 </section>
 
@@ -1650,9 +1709,12 @@ eval('puts a + b', get_binding)
                         <h3>Since 2.1, RGenGC</h3>
                         <h4>Restricted Generational Garbage Collection</h4>
                         <img src="img/generational_gc_problem.png" />
+                        <aside class="notes">
+                            Problem: Mature object could reference young object.
+                        </aside>
                     </section>
                     <section>
-                        <h3>Write barries</h3>
+                        <h3>Write barriers</h3>
                         <img src="img/gc_write_barries.png" />
                         <aside class="notes">
                             Ruby 2.1 uses an old GC technique called write barriers to monitor changes to mature objects – whenever you add a reference from one object to another (whenever you write to or modify an object), a write barrier is triggered. The barriers check whether the source object is mature, and if so adds the mature object to a special list. Later Ruby 2.1 includes these just these modified mature objects in the next mark and sweep process, preventing active, young objects from being incorrectly considered garbage.
